@@ -6,19 +6,12 @@ H			[a-fA-F0-9]
 %{
 #include <stdio.h>
 #include <string.h>
+#include "calc.tab.h"
 
-enum {DECIMAL=300, HEXADECIMAL, REGISTER, ACCUMULATOR, TOP, SIZE};
-enum {AND=400, OR, NOT, NEGATIVE};
-enum {PUSH=500, POP, SHOW, LOAD};
-
-void comment(void);
+int hexToDec(char *);
 %}
 
 %%
-"/*"					{ comment(); }
-
-"#"[^\n]*				{ /* ignore C preprocessor */ }
-"//"[^\n]*              { /* ignore single-line comment */ }
 
 "AND"                   { return AND; }
 "OR"                    { return OR; }
@@ -29,8 +22,8 @@ void comment(void);
 "SHOW"                  { return SHOW; }
 "LOAD"                  { return LOAD; }
 
-{D}+                    { yylval = atoi(yytext); return DECIMAL; }
-{D}{1,4}"h"             { yylval = hexToDec(yytext); return HEXADECIMAL; }
+{D}+                    { yylval = atoi(yytext); return CONSTANT; }
+{H}{1,4}"h"             { yylval = hexToDec(toupper(yytext)); return CONSTANT; }
 
 [ \t\v\f]				{ /* ignore whitespace */ }
 
@@ -40,23 +33,21 @@ void comment(void);
 
 %%
 
-void comment(void)
+int hexToDec(char *s)
 {
-	char c, prev = 0;
-  
-	while ((c = input()) != 0)      /* (EOF maps to 0) */
-	{
-		if (c == '/' && prev == '*')
-			return;
-		prev = c;
-	}
-}
-
-int main(int argc, char **argv)
-{
-	while(yylex()) {
-        printf("%s\n", yytext);
+    int i = 0, value = 0;
+    for (i = 0; s[i] != 'h'; i++)
+    {
+        value *= 16;
+        if (s[i] >= '0' && s[i] <= '9')
+        {
+            value += s[i] - '0';
+        }
+        else
+        {
+            value += s[i] - 'A' + 10;
+        }
     }
 
-	return 0;
+    return value;
 }
