@@ -45,6 +45,7 @@ line:
 
 exp:
   CONSTANT				{ $$ = $1;           						}
+| REG					{ $$ = *getRegister($1);					}
 | exp AND exp			{ $$ = $1 & $3;								}
 | exp OR exp			{ $$ = $1 | $3;								}
 | exp '+' exp			{ $$ = $1 + $3;     						}
