@@ -3,3 +3,4 @@
 lex.yy.c
 calc.tab.h
 calc.tab.c
+calc

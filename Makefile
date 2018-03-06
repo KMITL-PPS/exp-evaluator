@@ -1,9 +1,11 @@
+OBJS = calc.y calc.flex main.c
+
 CC = gcc
 
-calc:
+calc: $(OBJS)
 	bison -d calc.y
 	flex calc.flex
-	$(CC) lex.yy.c -o calc
+	$(CC) main.c calc.tab.c lex.yy.c -ll -o calc
 
 clean:
-	rm calc.tab.c calc.tab.h lex.yy.c
+	rm calc.tab.c calc.tab.h lex.yy.c calc
