@@ -45,8 +45,8 @@ input:
 | input error line		{
 							// yyclearin;
 							// yyerrok;
-							// errors = 0;
 							YYABORT;
+							errors = 0;
 						}
 ;
 
@@ -69,7 +69,7 @@ exp:
 							if ($1 == REG_TOP && size <= 0)
 							{
 								yyerror("stack is empty");
-								errors++;
+								// errors++;
 								YYACCEPT;
 							}
 							else
@@ -164,6 +164,7 @@ regop:
 void yyerror(char *s)
 {
 	fprintf(stderr, "! ERROR: %s\n", s);
+	errors++;
 }
 
 void push(int i)
