@@ -4,6 +4,7 @@
 #include <math.h>
 
 void yyerror(char *s);
+int yyparse();
 int yylex(void);
 void push(int);
 void pop(int);
@@ -17,6 +18,7 @@ typedef struct node {
 
 #define REG_TOP 27
 
+int errors = 0;
 int reg[26] = {0}, acc = 0, size = 0;
 node_t *top = NULL;
 %}
@@ -36,17 +38,28 @@ node_t *top = NULL;
 
 input:
   %empty				{ }
-| input line			{ printf("> "); 							}
+| input line			{
+							printf("> ");
+							errors = 0;
+						}
 | input error line		{
-							yyclearin;
-							yyerrok;
+							// yyclearin;
+							// yyerrok;
+							// errors = 0;
 							YYABORT;
 						}
 ;
 
 line:
   '\n'
-| exp '\n'  			{ acc = $1; printf("= %d\n", $1); 			}
+| exp '\n'  			{
+							if (errors == 0)
+							{
+								acc = $1;
+								printf("= %d\n", $1);
+							}
+							errors = 0;
+						}
 | regop '\n'			{ }
 ;
 
@@ -56,7 +69,8 @@ exp:
 							if ($1 == REG_TOP && size <= 0)
 							{
 								yyerror("stack is empty");
-								YYERROR;
+								errors++;
+								YYACCEPT;
 							}
 							else
 							{
@@ -88,6 +102,10 @@ exp:
      					}
 | NOT exp				{ $$ = ~$2;									}
 | '-' exp  %prec NEG	{ $$ = -$2;          						}
+| '+' exp				{
+							yyerror("syntax error");
+							YYERROR;
+						}
 | exp '^' exp			{ $$ = pow($1, $3);     					}
 | '(' exp ')'			{ $$ = $2;           						}
 ;
@@ -97,6 +115,7 @@ regop:
 	  						if ($2 == REG_TOP && size <= 0)
 							{
 								yyerror("stack is empty");
+								errors = 0;
 							}
 							else
 							{
@@ -109,9 +128,20 @@ regop:
 							else
 							{
 								yyerror("destination register is read-only");
+								errors = 0;
 							}
 						}
-| PUSH REG				{ push($2);									}
+| PUSH REG				{
+	  						if ($2 == REG_TOP && size <= 0)
+							{
+								yyerror("stack is empty");
+								errors = 0;
+							}
+							else
+							{
+								push($2);
+							}
+						}
 | POP REG				{
 							if ($2 >= 0 && $2 <= 25)
 								if (size > 0)
@@ -119,10 +149,12 @@ regop:
 								else
 								{
 									yyerror("stack is empty");
+									errors = 0;
 								}
 							else
 							{
 								yyerror("destination register is read-only");
+								errors = 0;
 							}
 						}
 ;
