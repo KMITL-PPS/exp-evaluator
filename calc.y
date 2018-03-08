@@ -51,7 +51,12 @@ exp:
 | exp '+' exp			{ $$ = $1 + $3;     						}
 | exp '-' exp			{ $$ = $1 - $3;      						}
 | exp '*' exp			{ $$ = $1 * $3;      						}
-| exp '/' exp			{ $$ = $1 / $3;      						}
+| exp '/' exp			{
+       						if ($3)
+        						$$ = $1 / $3;
+       						else
+								yyerror("division by zero");
+     					}
 | exp '\\' exp			{ $$ = $1 % $3;								}
 | NOT exp				{ $$ = ~$2;									}
 | '-' exp  %prec NEG	{ $$ = -$2;          						}
