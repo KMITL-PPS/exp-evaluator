@@ -17,6 +17,8 @@ typedef struct node {
 } node_t;
 
 #define REG_TOP 27
+#define REG_A 0
+#define REG_Z 25
 
 int errors = 0;
 int reg[26] = {0}, acc = 0, size = 0;
@@ -45,8 +47,8 @@ input:
 | input error line		{
 							// yyclearin;
 							// yyerrok;
-							YYABORT;
 							errors = 0;
+							YYABORT;
 						}
 ;
 
@@ -123,7 +125,7 @@ regop:
 							}
 						}
 | LOAD REG REG			{
-							if ($3 >= 0 && $3 <= 25)
+							if ($3 >= REG_A && $3 <= REG_Z)
 								load($2, $3);
 							else
 							{
@@ -143,7 +145,7 @@ regop:
 							}
 						}
 | POP REG				{
-							if ($2 >= 0 && $2 <= 25)
+							if ($2 >= REG_A && $2 <= REG_Z)
 								if (size > 0)
 									pop($2);
 								else
@@ -197,16 +199,7 @@ int* getRegister(int i)
 	}
 	else if (i == 27)
 	{
-		if (size > 0)
-		{
-			return &(top->value);
-		}
-		else
-		{
-			// TODO: show error
-			int tmp = 0;
-			return &tmp;
-		}
+		return &(top->value);
 	}
 	else if (i == 28)
 	{
