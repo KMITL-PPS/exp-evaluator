@@ -30,7 +30,7 @@ int hexToDec(char *);
 ("SHOW"|"show")             { return SHOW; }
 ("LOAD"|"load")             { return LOAD; }
 
-{H}{1,4}"h"             { yylval = hexToDec(yytext); return CONSTANT; }
+{H}+[hH]             	{ yylval = hexToDec(yytext); return CONSTANT; }
 {D}+                    { yylval = atoi(yytext); return CONSTANT; }
 
 "$r"{L}              	{ yylval = yytext[2] - 'A'; return REG; }
@@ -49,7 +49,7 @@ int hexToDec(char *);
 int hexToDec(char *s)
 {
 	int i = 0, value = 0;
-	for (i = 0; s[i] != 'h'; i++)
+	for (i = 0; s[i] != 'h' && s[i] != 'H'; i++)
 	{
 		value *= 16;
 		if (s[i] >= '0' && s[i] <= '9')
