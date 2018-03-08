@@ -15,6 +15,8 @@ typedef struct node {
 	struct node* back;
 } node_t;
 
+#define REG_TOP 27
+
 int reg[26] = {0}, acc = 0, size = 0;
 node_t *top = NULL;
 %}
@@ -33,19 +35,34 @@ node_t *top = NULL;
 %%
 
 input:
-  %empty				{ printf("> "); 							}
+  %empty				{ }
 | input line			{ printf("> "); 							}
+| input error line		{
+							yyclearin;
+							yyerrok;
+							YYABORT;
+						}
 ;
 
 line:
   '\n'
 | exp '\n'  			{ acc = $1; printf("= %d\n", $1); 			}
-| regop '\n'
+| regop '\n'			{ }
 ;
 
 exp:
   CONSTANT				{ $$ = $1;           						}
-| REG					{ $$ = *getRegister($1);					}
+| REG					{
+							if ($1 == REG_TOP && size <= 0)
+							{
+								yyerror("stack is empty");
+								YYERROR;
+							}
+							else
+							{
+								$$ = *getRegister($1);
+							}
+						}
 | exp AND exp			{ $$ = $1 & $3;								}
 | exp OR exp			{ $$ = $1 | $3;								}
 | exp '+' exp			{ $$ = $1 + $3;     						}
@@ -55,9 +72,20 @@ exp:
        						if ($3)
         						$$ = $1 / $3;
        						else
+							{
 								yyerror("division by zero");
+								YYABORT;
+							}
      					}
-| exp '\\' exp			{ $$ = $1 % $3;								}
+| exp '\\' exp			{
+       						if ($3)
+        						$$ = $1 % $3;
+       						else
+							{
+								yyerror("modulo by zero");
+								YYABORT;
+							}
+     					}
 | NOT exp				{ $$ = ~$2;									}
 | '-' exp  %prec NEG	{ $$ = -$2;          						}
 | exp '^' exp			{ $$ = pow($1, $3);     					}
@@ -65,17 +93,45 @@ exp:
 ;
 
 regop:
-  SHOW REG				{ printf("= %d\n", *getRegister($2));		}
-| LOAD REG REG			{ load($2, $3);								}
+  SHOW REG				{
+	  						if ($2 == REG_TOP && size <= 0)
+							{
+								yyerror("stack is empty");
+							}
+							else
+							{
+								printf("= %d\n", *getRegister($2));
+							}
+						}
+| LOAD REG REG			{
+							if ($3 >= 0 && $3 <= 25)
+								load($2, $3);
+							else
+							{
+								yyerror("destination register is read-only");
+							}
+						}
 | PUSH REG				{ push($2);									}
-| POP REG				{ pop($2);									}
+| POP REG				{
+							if ($2 >= 0 && $2 <= 25)
+								if (size > 0)
+									pop($2);
+								else
+								{
+									yyerror("stack is empty");
+								}
+							else
+							{
+								yyerror("destination register is read-only");
+							}
+						}
 ;
 
 %%
 
 void yyerror(char *s)
 {
-	printf("! ERROR: %s\n", s);
+	fprintf(stderr, "! ERROR: %s\n", s);
 }
 
 void push(int i)
@@ -89,25 +145,11 @@ void push(int i)
 
 void pop(int i)
 {
-	if (i >= 0 && i <= 25)
-	{
-		if (size > 0)
-		{
-			node_t *tmp = top;
-			*getRegister(i) = tmp->value;
-			top = tmp->back;
-			free(tmp);
-			size--;
-		}
-		else
-		{
-			// TODO: show error
-		}
-	}
-	else
-	{
-		// TODO: show error
-	}
+	node_t *tmp = top;
+	*getRegister(i) = tmp->value;
+	top = tmp->back;
+	free(tmp);
+	size--;
 }
 
 int* getRegister(int i)

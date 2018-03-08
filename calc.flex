@@ -13,9 +13,9 @@ int hexToDec(char *);
 
 %%
 
-"AND"                   { return AND; }
-"OR"                    { return OR; }
-"NOT"                   { return NOT; }
+("AND"|"and")                   { return AND; }
+("OR"|"or")                    { return OR; }
+("NOT"|"not")                   { return NOT; }
 "+"                     { return '+'; }
 "-"                     { return '-'; }
 "*"                     { return '*'; }
@@ -25,15 +25,15 @@ int hexToDec(char *);
 "("                     { return '('; }
 ")"                     { return ')'; }
 
-"PUSH"                  { return PUSH; }
-"POP"                   { return POP; }
-"SHOW"                  { return SHOW; }
-"LOAD"                  { return LOAD; }
+("PUSH"|"push")             { return PUSH; }
+("POP"|"pop")               { return POP; }
+("SHOW"|"show")             { return SHOW; }
+("LOAD"|"load")             { return LOAD; }
 
 {H}{1,4}"h"             { yylval = hexToDec(yytext); return CONSTANT; }
 {D}+                    { yylval = atoi(yytext); return CONSTANT; }
 
-"$r"{L}                 { yylval = yytext[2] - 'A'; return REG; }
+"$r"{L}              	{ yylval = yytext[2] - 'A'; return REG; }
 "$acc"                  { yylval = 26; return REG; }
 "$top"                  { yylval = 27; return REG; }
 "$size"                 { yylval = 28; return REG; }
@@ -42,7 +42,7 @@ int hexToDec(char *);
 
 \n                      { yylineno++; return '\n'; }
 
-.						{ /* error */ }
+.						{ return yytext[0]; }
 
 %%
 
