@@ -126,7 +126,13 @@ regop:
 						}
 | LOAD REG REG			{
 							if ($3 >= REG_A && $3 <= REG_Z)
-								load($2, $3);
+								if ($2 == REG_TOP && size <= 0)
+								{
+									yyerror("stack is empty");
+									errors = 0;
+								}
+								else
+									load($2, $3);
 							else
 							{
 								yyerror("destination register is read-only");
