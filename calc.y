@@ -9,7 +9,7 @@ int yylex(void);
 void push(int);
 void pop(int);
 int* getRegister(int);
-void load(int, int);	// TODO: return error
+void load(int, int);
 
 typedef struct node {
 	int value;
@@ -85,23 +85,23 @@ exp:
 | exp '-' exp			{ $$ = $1 - $3;      						}
 | exp '*' exp			{ $$ = $1 * $3;      						}
 | exp '/' exp			{
-       						if ($3)
-        						$$ = $1 / $3;
-       						else
+	   						if ($3)
+								$$ = $1 / $3;
+	   						else
 							{
 								yyerror("division by zero");
 								YYABORT;
 							}
-     					}
+	 					}
 | exp '\\' exp			{
-       						if ($3)
-        						$$ = $1 % $3;
-       						else
+	   						if ($3)
+								$$ = $1 % $3;
+	   						else
 							{
 								yyerror("modulo by zero");
 								YYABORT;
 							}
-     					}
+	 					}
 | NOT exp				{ $$ = ~$2;									}
 | '-' exp  %prec NEG	{ $$ = -$2;          						}
 | '+' exp				{
@@ -213,12 +213,5 @@ int* getRegister(int i)
 
 void load(int src, int dest)
 {
-	if (dest >= 0 && dest <= 25)
-	{
-		*getRegister(dest) = *getRegister(src);
-	}
-	else
-	{
-		// TODO: return error
-	}
+	*getRegister(dest) = *getRegister(src);
 }

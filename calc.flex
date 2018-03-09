@@ -13,36 +13,36 @@ int hexToDec(char *);
 
 %%
 
-("AND"|"and")                   { return AND; }
-("OR"|"or")                    { return OR; }
-("NOT"|"not")                   { return NOT; }
-"+"                     { return '+'; }
-"-"                     { return '-'; }
-"*"                     { return '*'; }
-"/"                     { return '/'; }
-"\\"                    { return '\\'; }
-"^"                     { return '^'; }
-"("                     { return '('; }
-")"                     { return ')'; }
+("AND"|"and")				{ return AND; }
+("OR"|"or")					{ return OR; }
+("NOT"|"not")				{ return NOT; }
+"+"							{ return '+'; }
+"-"							{ return '-'; }
+"*"							{ return '*'; }
+"/"							{ return '/'; }
+"\\"						{ return '\\'; }
+"^"							{ return '^'; }
+"("							{ return '('; }
+")"							{ return ')'; }
 
-("PUSH"|"push")             { return PUSH; }
-("POP"|"pop")               { return POP; }
-("SHOW"|"show")             { return SHOW; }
-("LOAD"|"load")             { return LOAD; }
+("PUSH"|"push")				{ return PUSH; }
+("POP"|"pop")				{ return POP; }
+("SHOW"|"show")				{ return SHOW; }
+("LOAD"|"load")				{ return LOAD; }
 
-{H}+[hH]             	{ yylval = hexToDec(yytext); return CONSTANT; }
-{D}+                    { yylval = atoi(yytext); return CONSTANT; }
+{H}+[hH]					{ yylval = hexToDec(yytext); return CONSTANT; }
+{D}+						{ yylval = atoi(yytext); return CONSTANT; }
 
-"$r"{L}              	{ yylval = yytext[2] - 'A'; return REG; }
-"$acc"                  { yylval = 26; return REG; }
-"$top"                  { yylval = 27; return REG; }
-"$size"                 { yylval = 28; return REG; }
+"$r"{L}						{ yylval = yytext[2] - 'A'; return REG; }
+"$acc"						{ yylval = 26; return REG; }
+"$top"						{ yylval = 27; return REG; }
+"$size"						{ yylval = 28; return REG; }
 
-[ \t\v\f]				{ /* ignore whitespace */ }
+[ \t\v\f]					{ /* ignore whitespace */ }
 
-\n                      { yylineno++; return '\n'; }
+\n							{ yylineno++; return '\n'; }
 
-.						{ return yytext[0]; }
+.							{ return yytext[0]; }
 
 %%
 
